@@ -4,7 +4,7 @@
 
             <div class="d-flex justify-content-center">
                 <div style="margin-top: 10px;margin-bottom: -90px;">
-                    <h3>User Management Portal</h3>
+                    <h3>Kullanıcı oluşturmak</h3>
                 </div>
             </div>
 
@@ -17,11 +17,11 @@
                                 <i class="fas fa-user"></i>
                             </span>
                         </div>
-                        <input type="text" class="form-control" name="firstName" placeholder="First Name" ngModel
+                        <input type="text" class="form-control" name="firstName" placeholder="Adı" ngModel
                             #firstNameInput="ngModel" required>
                     </div>
                     <span class="help-block" style="color: red;"
-                        *ngIf="firstNameInput.invalid && firstNameInput.touched ">Please enter your first name
+                        *ngIf="firstNameInput.invalid && firstNameInput.touched ">Lütfen adınızı giriniz
                     </span>
                     <!-- lastName -->
                     <div class="input-group mb-3">
@@ -30,11 +30,11 @@
                                 <i class="fas fa-user"></i>
                             </span>
                         </div>
-                        <input type="text" class="form-control" name="lastName" placeholder="Last Name" ngModel
+                        <input type="text" class="form-control" name="lastName" placeholder="Soyadı" ngModel
                             #lastNameInput="ngModel" required>
                     </div>
                     <span class="help-block" style="color: red;"
-                        *ngIf="lastNameInput.invalid && lastNameInput.touched ">Please enter your last name
+                        *ngIf="lastNameInput.invalid && lastNameInput.touched ">Lütfen soyadınızı giriniz
                     </span>
                     <!-- username -->
                     <div class="input-group mb-3">
@@ -43,11 +43,11 @@
                                 <i class="fas fa-id-card"></i>
                             </span>
                         </div>
-                        <input type="text" class="form-control" name="username" placeholder="Username" ngModel
+                        <input type="text" class="form-control" name="username" placeholder="kullanıcı adı" ngModel
                             #usernameInput="ngModel" required>
                     </div>
                     <span class="help-block" style="color: red;"
-                        *ngIf="usernameInput.invalid && usernameInput.touched ">Please enter a username
+                        *ngIf="usernameInput.invalid && usernameInput.touched ">Lütfen kullanıcı adı giriniz
                     </span>
                     
                     <!-- email -->
@@ -57,11 +57,25 @@
                                 <i class="fas fa-envelope"></i>
                             </span>
                         </div>
-                        <input type="email" class="form-control" name="email" placeholder="Username" ngModel
+                        <input type="email" class="form-control" name="email" placeholder="E-posta" ngModel
                             #emailInput="ngModel" required>
                     </div>
                     <span class="help-block" style="color: red;"
-                        *ngIf="emailInput.invalid && emailInput.touched ">Please enter your valid email address
+                        *ngIf="emailInput.invalid && emailInput.touched ">Lütfen geçerli e-posta  giriniz
+                    </span>
+                    <!-- contact -->
+                    <div class="input-group mb-3">
+                        <div class="input-group-append">
+                            <span class="input-group-text">
+                                <i class="fas fa-phone"></i>
+                            </span>
+                        </div>
+                        <input type="text" (keypress)="contactValidation($event)"
+                        (input)="onContactInputChangeControl($event)"  class="form-control" name="contact" placeholder="(0555)-555-55-55" ngModel
+                            #contactInput="ngModel" required>
+                    </div>
+                    <span class="help-block" style="color: red;"
+                        *ngIf="contactInput.invalid && contactInput.touched ">Lütfen geçerli telefon numaranızı giriniz
                     </span>
 
                    
@@ -69,15 +83,15 @@
                         <button type="submit" name="button" [disabled]="loginForm.invalid || showLoading"
                             class="btn login_btn">
                             <i *ngIf="showLoading" class="fas fa-spinner fa-spin"></i>&nbsp;&nbsp;
-                            <span *ngIf="showLoading">Loading...</span>
-                            <span *ngIf="!showLoading">Register</span>
+                            <span *ngIf="showLoading">Yükleniyor...</span>
+                            <span *ngIf="!showLoading">Kayıt Et</span>
                         </button>
                     </div>
                 </form>
             </div>
             <div class="mt-4">
-                <div class="d-flex justify-content-center links">Already have an account? <a class="ml-2"
-                        routerLink="/login" style="color:#2C3E50; ">Log In</a>
+                <div class="d-flex justify-content-center links">Hesabınız var mı? <a class="ml-2"
+                        routerLink="/login" style="color:#2C3E50; ">Giriş yap</a>
                 </div>
             </div>
         </div>

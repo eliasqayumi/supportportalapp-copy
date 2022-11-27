@@ -40,11 +40,9 @@ export class StatusComponent implements OnInit {
   }
 
   public onAddStatus(addForm: NgForm): void {
-    console.log(addForm.value)
     document.getElementById('add-status-form')?.click();
     this.statusService.insert(addForm.value).subscribe(
       (response: Status) => {
-        console.log(response);
         this.getAll();
         addForm.reset();
       },
@@ -56,10 +54,8 @@ export class StatusComponent implements OnInit {
   }
 
   public onUpdateStatus(status: Status): void {
-    console.log(status)
     this.statusService.update(status).subscribe(
       (response: Status) => {
-        console.log(response);
         this.getAll();
       },
       (error: HttpErrorResponse) => {
@@ -71,7 +67,6 @@ export class StatusComponent implements OnInit {
   public onDeleteStatus(statusId: number): void {
     this.statusService.deleteById(statusId).subscribe(
       (response: void) => {
-        console.log(response);
         this.getAll();
       },
       (error: HttpErrorResponse) => {
@@ -81,7 +76,6 @@ export class StatusComponent implements OnInit {
   }
 
   public search(key: string): void {
-    console.log(key);
     const results: Status[] = [];
     for (const Status of this.statuses) {
       if (Status.status.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
@@ -115,7 +109,6 @@ export class StatusComponent implements OnInit {
     }
     container != null ? container.appendChild(button) : null;
     button.click();
-    console.log(mode)
   }
   public onSelect(Status:Status) {
     this.router.navigate([Status.id], { relativeTo: this.activatedRoute })

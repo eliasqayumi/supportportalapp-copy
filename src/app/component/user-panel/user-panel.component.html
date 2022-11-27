@@ -7,14 +7,15 @@
       <i class="fa fa-home"></i>
       Ana Sayfa
    </a>
-   <a class="nav-item nav-link  ml-2" data-toggle="tab" (click)="onSelect(null,'my-home-selected')" style="color:white">
+   <a [hidden]="!isAdminOrManagerOrHR" class="nav-item nav-link  ml-2" data-toggle="tab"
+      (click)="onSelect(null,'my-home-selected')" style="color:white">
       <i class="fa fa-list"></i>
       Emlaklarım
    </a>
    <a class="nav-item nav-link  ml-2" data-toggle="tab" (click)="onSelect(null,'requested-menu-selected')"
       style="color:white;">
       <i class="fa fa-tablet"></i>
-      Talebler
+      Talepler
    </a>
 
    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor02"
@@ -58,25 +59,52 @@
    </div>
 
    <div class="collapse navbar-collapse" id="navbarColor02">
-      <ul [hidden]="!filterRoomNumberShow" class="navbar-nav mr-auto roomFiltering">
-         <li class=" active " *ngFor="let roomNumber of roomNumbers">
-            <a class="nav-item nav-link checkbox-items" id="{{'box'+roomNumber.id}}"
-               (click)="onSelect(roomNumber,'check-box')">{{roomNumber.roomNumber}}
-            </a>
-            <input (change)="checkboxOnChange($event)" hidden type="checkbox" id="{{'check-box'+roomNumber.id}}">
-         </li>
-      </ul>
-      <ul [hidden]="!filterRequestedHomesRoomNumberShow" class="navbar-nav mr-auto roomFiltering">
-         <li class=" active " *ngFor="let roomNumber of roomNumbers">
-            <a class="nav-item nav-link checkbox-items" id="{{'check-box-'+roomNumber.id}}"
-               (click)="onSelect(roomNumber,'requested-check-box')">{{roomNumber.roomNumber}}
-            </a>
-            <input (change)="requestedCheckboxOnChange($event)" hidden type="checkbox"
-               id="{{'requested-check-box-'+roomNumber.id}}">
-         </li>
-      </ul>
+      <div [hidden]="!filterRoomNumberShow">
+         <ul class="navbar-nav mr-auto roomFiltering">
+            <li class=" active " *ngFor="let roomNumber of roomNumbers">
+               <a class="nav-item nav-link checkbox-items" id="{{'box'+roomNumber.id}}"
+                  (click)="onSelect(roomNumber,'check-box')"><span
+                     style="font-size: 1.5em;">{{roomNumber.roomNumber}}</span>
+               </a>
+               <input (change)="roomNumberOnSelectChange($event)" hidden type="checkbox"
+                  id="{{'check-box'+roomNumber.id}}">
+            </li>
+         </ul>
+      </div>
+      <div [hidden]="!filterRoomNumberShow">
+         <form class="form-inline searchbar my-2 my-lg-0">
+            <input type="search" (keyup)="generalSearch($event)" #key="ngModel" ngModel name="key"
+               id="generalSearchName" class="form-control search-input mr-sm-2" placeholder="Genel emlak ara..."
+               required>
+         </form>
+      </div>
+      <div [hidden]="!addButton">
+         <form class="form-inline searchbar my-2 my-lg-0">
+            <input type="search" (keyup)="userHomeSearch($event)" #key="ngModel" ngModel name="key" id="userSearchName"
+               class="form-control search-input mr-sm-2" placeholder="Genel emlak ara..." required>
+         </form>
+      </div>
+      <div [hidden]="!filterRequestedHomesRoomNumberShow">
+         <ul class="navbar-nav mr-auto roomFiltering">
+            <li class=" active " *ngFor="let roomNumber of roomNumbers">
+               <a class="nav-item nav-link checkbox-items" id="{{'check-box-'+roomNumber.id}}"
+                  (click)="onSelect(roomNumber,'requested-check-box')"> <span
+                     style="font-size: 1.5em;">{{roomNumber.roomNumber}}</span>
+               </a>
+               <input (change)="requestedCheckboxOnChange($event)" hidden type="checkbox"
+                  id="{{'requested-check-box-'+roomNumber.id}}">
+            </li>
+         </ul>
+      </div>
+      <div [hidden]="!filterRequestedHomesRoomNumberShow">
+         <form class="form-inline searchbar my-2 my-lg-0">
+            <input type="search" (keyup)="requestedHomesSearch($event)" #key="ngModel" ngModel name="key"
+               id="requestedHomesSearchName" class="form-control search-input mr-sm-2" placeholder="Emlak Arama..."
+               required>
+         </form>
+      </div>
    </div>
-   <div class="collapse navbar-collapse" id="navbarColor02">
+   <!-- <div class="collapse navbar-collapse" id="navbarColor02">
       <div [hidden]="!filterRoomNumberShow" class="price-md">
          <input type="number" ngModel #minPrice="ngModel" (ngModelChange)="priceFiltering(minPrice.value,'minimum')"
             (keypress)="inputValidationControl($event)" name="minPrice" id="searchName"
@@ -85,7 +113,7 @@
             (keypress)="inputValidationControl($event)" name="maxPrice" id="searchName"
             class=" form-control search-input mr-sm-2 price-class" placeholder="Max TL" required>
       </div>
-   </div>
+   </div> -->
 </nav>
 
 <div class="tab-content mt-3" id="myTabContent">
@@ -167,8 +195,11 @@
                <div class="card m-b-30" (click)="onSelect(home,'openGeneralHomeInfo')">
                   <ul class="list-group list-group-flush">
                      <li class="list-group-item">
-                        <h4><span [style]="'color:red;'">{{home?.status?.status}}</span></h4>
-                        <h6><span [style]="'color:green;'">{{home?.header}}</span></h6>
+                        <h6><span [style]="'color:green;'">{{home?.header}} - </span><span
+                              [style]="'color:red;'">{{home?.status?.status}}</span></h6>
+                        <h6><span [style]="'color:black;'">{{home?.price}} {{home?.currency?.currency}}</span></h6>
+                        <h6><span [style]="'color:black;'">{{home?.roomNumber?.roomNumber}} -
+                              {{home?.floorNumber}}</span></h6>
                      </li>
                   </ul>
                </div>
@@ -218,7 +249,11 @@
                         <li class="list-group-item">
                            <i class="fa fa-envelope float-right"></i><strong>Açıklama :
                            </strong>
-                           {{selectedHome?.details}}
+                           <span [hidden]="isLink(selectedHome?.details)">
+                              {{selectedHome?.details}}
+                           </span>
+                           <span [hidden]="!isLink(selectedHome?.details)">
+                              <a href="{{selectedHome?.details}}" style="color: black;" >{{selectedHome?.details}}</a></span>
                         </li>
                         <li class="list-group-item">
                            <i class="fa fa-envelope float-right"></i><strong>Kat Sayısı:
@@ -253,7 +288,11 @@
             <div *ngFor="let home of userHomeLists" class="col-md-6 col-xl-3">
                <div class="card m-b-30 show-home">
                   <li class="list-group-item" (click)="onSelect(home,'openHomeInfo')">
-                     <h6><span [style]="'color:green;'">{{home?.header}}</span></h6>
+                     <h6><span [style]="'color:green;'">{{home?.header}} - </span> <span [style]="'color:red;'">
+                           {{home?.status?.status}}</span></h6>
+                     <h6><span [style]="'color:black;'">{{home?.price}} {{home?.currency?.currency}}</span></h6>
+                     <h6><span [style]="'color:black;'">{{home?.roomNumber?.roomNumber}} - {{home?.floorNumber}}</span>
+                     </h6>
                   </li>
                   <div class="card-body">
                      <div class="float-right btn-group btn-group-sm">
@@ -270,13 +309,15 @@
             data-target="#viewHomeModal"></button>
          <button [hidden]="true" type="button" id="openUserEdit" data-toggle="modal"
             data-target="#editUserModal"></button>
-
          <!--modal home info -->
          <div class="modal fade bd-example-modal-lg" id="viewHomeModal" tabindex="-1" role="dialog" aria-labelledby=""
             aria-hidden="true">
             <div class="modal-dialog" role="document">
                <div class="modal-content">
                   <div class="modal-header">
+                     <h5 style="color: green; text-align: left;">
+                        {{selectedHome?.status?.status}}
+                     </h5>
                      <button type="button" class="close" data-dismiss="modal" aria-label=" Close">
                         <span aria-hidden="true">&times;</span>
                      </button>
@@ -306,24 +347,34 @@
                            <i class="fa fa-envelope float-right"></i><strong>Şube : </strong>
                            {{selectedHome?.user?.agency?.agencyName}}
                         </li>
+
                         <li class="list-group-item">
-                           <i class="fa fa-envelope float-right"></i><strong>Adres : </strong>
-                           {{selectedHome?.address}}
-                        </li>
-                        <li class="list-group-item">
-                           <i class="fa fa-envelope float-right"></i><strong>Açıklama :
-                           </strong>
-                           {{selectedHome?.details}}
+                           <i class="fa fa-envelope float-right"></i><strong>Bulunduğu Kat: </strong>
+                           {{selectedHome?.floorNumber}}
                         </li>
                         <li class="list-group-item">
                            <i class="fa fa-envelope float-right"></i><strong>Kat Sayısı:
                            </strong>
                            {{selectedHome?.totalFloor}}
                         </li>
+                        <li class="list-group-item">
+                           <i class="fa fa-envelope float-right"></i><strong>Portföy Yetkilisi: </strong>
+                           {{selectedHome?.user?.firstName}} - {{selectedHome?.user?.lastName}}
+                        </li>
+                        <li class="list-group-item">
+                           <i class="fa fa-envelope float-right"></i><strong>Açıklama :
+                           </strong>
+                           <span [hidden]="isLink(selectedHome?.details)">
+                              {{selectedHome?.details}}
+                           </span>
+                           <span [hidden]="!isLink(selectedHome?.details)">
+                              <a href="{{selectedHome?.details}}" style="color: black;" >{{selectedHome?.details}}</a></span>
+                        </li>
+
                      </ul>
                   </div>
                   <div class=" modal-footer">
-                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                     <button type="button" id="homeInfoId" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
                   </div>
                </div>
             </div>
@@ -343,26 +394,26 @@
                   <div class="modal-body">
                      <form #addForm="ngForm" (ngSubmit)="onAddHome(addForm)">
                         <div class="form-group">
-                           <label for="header">Başlık</label>
-                           <input type="text" ngModel name="header" class="form-control" id="header"
+                           <label for="header">İl-İlçe</label>
+                           <input type="text" ngModel name="header" class="form-control" id="addHomeheaderId"
                               placeholder="Başlık Giriniz" required>
                         </div>
                         <div class="form-group">
                            <label for="price">Fiyat</label>
-                           <input type="number" ngModel name="price" class="form-control" id="price"
-                              placeholder="500,000" required>
+                           <input type="text" (keypress)="controlValue($event)" ngModel name="price"
+                              class="form-control" id="addHomePriceId" placeholder="500,000" required>
                            <label for="currencyId">Birim</label>
-                           <select [ngModel]="selectedCurrency?.id" name="currencyId" id="currencyId"
+                           <select [ngModel]="selectedCurrency?.id" name="currencyId" id="addHomeCurrencyId"
                               class="form-control" required>
                               <option *ngFor="let currency of currencies" [ngValue]="currency.id">
                                  {{currency.currency}} </option>
                            </select>
                         </div>
 
-                        <div class="form-group">
+                        <div [hidden]="true" class="form-group">
                            <label for="neighbourhoodId">İl - İlçe - Mah</label>
-                           <select [ngModel]="selectedNeighbourhood?.id" name="neighbourhoodId" id="neighbourhoodId"
-                              class="form-control" required>
+                           <select [ngModel]="selectedNeighbourhood?.id" name="neighbourhoodId"
+                              id="addHomeNeighbourhoodId" class="form-control" required>
                               <option *ngFor="let neighbourhood of neighbourhoods" [ngValue]="neighbourhood.id">
                                  {{neighbourhood.district.city.name}} - {{neighbourhood.district.name}} -
                                  {{neighbourhood.name}} </option>
@@ -371,15 +422,17 @@
 
                         <div class="form-group">
                            <label for="typeId">Tür</label>
-                           <select [ngModel]="selectedType?.id" name="typeId" id="typeId" class="form-control" required>
+                           <select [ngModel]="selectedType?.id" name="typeId" id="addHomeTypeId" class="form-control"
+                              required>
                               <option *ngFor="let type of types" [ngValue]="type.id">
                                  {{type.type}} </option>
                            </select>
                         </div>
 
                         <div class="form-group">
+
                            <label for="roomNumberId">Oda Sayısı</label>
-                           <select [ngModel]="selectedRoomNumber?.id" name="roomNumberId" id="roomNumberId"
+                           <select [ngModel]="selectedRoomNumber?.id" name="roomNumberId" id="addHomeRoomNumberId"
                               class="form-control" required>
                               <option *ngFor="let roomNumber of roomNumbers" [ngValue]="roomNumber.id">
                                  {{roomNumber.roomNumber}} </option>
@@ -388,7 +441,7 @@
 
                         <div class="form-group">
                            <label for="homeType">Emlak Türü</label>
-                           <select [ngModel]="selectedHomeType?.id" name="homeTypeId" id="homeTypeId"
+                           <select [ngModel]="selectedHomeType?.id" name="homeTypeId" id="addHomeHomeTypeId"
                               class="form-control" required>
                               <option *ngFor="let homeType of homeTypes" [ngValue]="homeType.id">
                                  {{homeType.homeType}} </option>
@@ -397,8 +450,8 @@
 
                         <div class="form-group">
                            <label for="statusId">Durum</label>
-                           <select [ngModel]="selectedStatus?.id" name="statusId" id="statusId" class="form-control"
-                              required>
+                           <select [ngModel]="selectedStatus?.id" name="statusId" id="addHomeStatusId"
+                              class="form-control" required>
                               <option *ngFor="let status of statuses" [ngValue]="status.id">
                                  {{status.status}}</option>
                            </select>
@@ -406,27 +459,27 @@
                         <hr>
                         <div class="form-group">
                            <label for="floorNumber">Bulunduğu Kat</label>
-                           <input type="number" ngModel name="floorNumber" class="form-control" id="floorNumber"
+                           <input type="number" ngModel name="floorNumber" class="form-control" id="floorNumberId"
                               placeholder="Bulunduğu kat" required>
                         </div>
                         <div class="form-group">
-                           <input [hidden]="true" [ngModel]="user.userId" name="userId" id="userId"
+                           <input [hidden]="true" [ngModel]="user.userId" name="userId" id="userDataUserId"
                               class="form-control">
                         </div>
                         <div class="form-group">
                            <label for="totalFloor">Kat Sayısı</label>
-                           <input type="number" ngModel name="totalFloor" class="form-control" id="totalFloor"
+                           <input type="number" ngModel name="totalFloor" class="form-control" id="addHomeTotalFloorId"
                               placeholder="Kat sayısı" required>
                         </div>
-                        <div class="form-group">
+                        <div [hidden]="true" class="form-group">
                            <label for="address">Adres : </label>
                            <textarea type="text" [style]="'resize:none;'" ngModel name="address" class="form-control"
-                              id="address" placeholder="Adres..." required></textarea>
+                              id="addHomeAddressId" placeholder="Adres..."></textarea>
                         </div>
                         <div class="form-group">
                            <label for="details">Açıklama : </label>
                            <textarea type="text" ngModel [style]="'resize:none;'" name="details" class="form-control"
-                              id="details" placeholder="Açıklama..." required></textarea>
+                              id="addHomeDetailsId" placeholder="Açıklama..." required></textarea>
                         </div>
 
                         <div class="modal-footer">
@@ -440,7 +493,6 @@
                </div>
             </div>
          </div>
-
          <!-- Edit Modal -->
          <div class="modal fade" id="updateHomeModal" tabindex="-1" role="dialog"
             aria-labelledby="HomeTypeEditModalLabel" aria-hidden="true">
@@ -457,16 +509,16 @@
                         <div class="form-group">
                            <label for="header">Başlık</label>
                            <input type="text" [ngModel]="editHome?.header" name="header" class="form-control"
-                              id="header" placeholder="Başlık Giriniz" required>
+                              id="editHeaderId" placeholder="Başlık Giriniz" required>
                         </div>
                         <!-- Price and Currency -->
                         <div class="form-group">
                            <label for="price">Fiyat : </label>
-                           <input type="number" [ngModel]="editHome?.price" name="price" class="form-control" id="price"
-                              placeholder="500,000" required>
+                           <input type="text" (keypress)="controlValue($event)" [ngModel]="editHome?.price" name="price"
+                              class="form-control" id="editHomePriceId" placeholder="500,000" required>
                            <!-- select Currency -->
                            <label for="currencyId">Birim : </label>
-                           <select [ngModel]="editHome?.currency?.id" name="currencyId" id="currencyId"
+                           <select [ngModel]="editHome?.currency?.id" name="currencyId" id="editCurrencyId"
                               class="form-control">
                               <option *ngFor="let currency of currencies" [ngValue]="currency.id">
                                  {{currency.currency}} </option>
@@ -475,8 +527,8 @@
                         <!-- select City-District-Neighbourhood -->
                         <div class="form-group">
                            <label for="neighbourhoodId">İl - İlçe - Mah : </label>
-                           <select [ngModel]="editHome?.neighbourhood?.id" name="neighbourhoodId" id="neighbourhoodId"
-                              class="form-control">
+                           <select [ngModel]="editHome?.neighbourhood?.id" name="neighbourhoodId"
+                              id="editHomeNeighbourhoodId" class="form-control">
                               <option *ngFor="let neighbourhood of neighbourhoods" [ngValue]="neighbourhood.id">
                                  {{neighbourhood.district.city.name}} - {{neighbourhood.district.name}} -
                                  {{neighbourhood.name}} </option>
@@ -485,7 +537,7 @@
                         <!-- select Type -->
                         <div class="form-group">
                            <label for="typeId">Tip : </label>
-                           <select [ngModel]="editHome?.type?.id" name="typeId" id="typeId" class="form-control">
+                           <select [ngModel]="editHome?.type?.id" name="typeId" id="editTypeId" class="form-control">
                               <option *ngFor="let type of types" [ngValue]="type.id">
                                  {{type.type}} </option>
                            </select>
@@ -493,7 +545,7 @@
                         <!-- select Room number -->
                         <div class="form-group">
                            <label for="roomNumberId">Oda Sayısı : </label>
-                           <select [ngModel]="editHome?.roomNumber?.id" name="roomNumberId" id="roomNumberId"
+                           <select [ngModel]="editHome?.roomNumber?.id" name="roomNumberId" id="editHomeRoomNumberId"
                               class="form-control">
                               <option *ngFor="let roomNumber of roomNumbers" [ngValue]="roomNumber.id">
                                  {{roomNumber.roomNumber}} </option>
@@ -502,7 +554,7 @@
                         <!-- select Home type -->
                         <div class="form-group">
                            <label for="homeTypeId">Emlak Tipi: </label>
-                           <select [ngModel]="editHome?.homeType?.id" name="homeTypeId" id="homeTypeId"
+                           <select [ngModel]="editHome?.homeType?.id" name="homeTypeId" id="editHomeHomeTypeId"
                               class="form-control">
                               <option *ngFor="let homeType of homeTypes" [ngValue]="homeType.id">
                                  {{homeType.homeType}} </option>
@@ -510,13 +562,14 @@
                         </div>
                         <!-- select User  -->
                         <div class="form-group">
-                           <input [hidden]="true" [ngModel]="user.userId" name="userId" id="userId"
+                           <input [hidden]="true" [ngModel]="user.userId" name="userId" id="userDataEditUserId"
                               class="form-control">
                         </div>
                         <!-- select Status  -->
                         <div class="form-group">
                            <label for="statusId">Durum : </label>
-                           <select [ngModel]="editHome?.status?.id" name="statusId" id="statusId" class="form-control">
+                           <select [ngModel]="editHome?.status?.id" name="statusId" id="editHomeStatusId"
+                              class="form-control">
                               <option *ngFor="let status of statuses" [ngValue]="status.id">
                                  {{status.status}}</option>
                            </select>
@@ -526,29 +579,31 @@
                         <div class="form-group">
                            <label for="floorNumber">Bulunduğu Kat</label>
                            <input type="number" [ngModel]="editHome?.floorNumber" name="floorNumber"
-                              class="form-control" id="floorNumber" placeholder="Bulunduğu kat" required>
+                              class="form-control" id="editfloorNumberId" placeholder="Bulunduğu kat" required>
                         </div>
                         <!-- Total floor   -->
                         <div class="form-group">
                            <label for="totalFloor">Kat Sayısı</label>
                            <input type="number" [ngModel]="editHome?.totalFloor" name="totalFloor" class="form-control"
-                              id="totalFloor" placeholder="Kat sayısı" required>
+                              id="editTotalFloorId" placeholder="Kat sayısı" required>
                         </div>
                         <!-- Address Input -->
-                        <div class="form-group">
+                        <div [hidden]="true" class="form-group">
                            <label for="address">Adres : </label>
                            <textarea type="text" [ngModel]="editHome?.address" name="address" class="form-control"
-                              [style]="'resize:none;'" id="address" placeholder="Adres..." required></textarea>
+                              [style]="'resize:none;'" id="editModelAddressId" placeholder="Adres..."></textarea>
                         </div>
                         <!-- Details Input -->
                         <div class="form-group">
                            <label for="details">Açıklama : </label>
                            <textarea type="text" [ngModel]="editHome?.details" name="details" class="form-control"
-                              [style]="'resize:none;'" id="details" placeholder="Açıklama..." required></textarea>
+                              [style]="'resize:none;'" id="editModelDetails" placeholder="Açıklama..."
+                              required></textarea>
                         </div>
-                        <input type="hidden" ngModel="{{editHome?.id}}" name="id" class="form-control" id="id">
+                        <input type="hidden" ngModel="{{editHome?.id}}" name="id" class="form-control" id="editHomeId">
                         <div class="modal-footer">
-                           <button type="button" id="" data-dismiss="modal" class="btn btn-secondary">Kapat</button>
+                           <button type="button" id="ediModelId" data-dismiss="modal"
+                              class="btn btn-secondary">Kapat</button>
                            <button (click)="onUpdateHome(editForm)" data-dismiss="modal" class="btn btn-primary">Kayıt
                               et</button>
                         </div>
@@ -571,7 +626,7 @@
                   </div>
                   <!-- Button -->
                   <div class="modal-body">
-                     <p>{{deleteHome?.id}} emlağı silmek ister misiniz?</p>
+                     <p> Emlağı silmek ister misiniz?</p>
                      <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Hayır</button>
                         <button (click)="onDeleteHome(deleteHome.id)" class="btn btn-danger"
@@ -589,7 +644,6 @@
          </div>
       </div>
    </div>
-   <!-- should check -->
    <!-- user profile -->
    <div class="tab-pane" id="show-profile">
       <div class="container">
@@ -631,12 +685,11 @@
                                           </button>
                                        </div>
                                        <div class="mt-2">
-                                          <button class="btn btn-info"
-                                              (click)="passwordChangeClick( 'add')">
-                                              <i class="fa fa-key"></i>
-                                              <span> Şifre Değiştir</span>
+                                          <button class="btn btn-info" (click)="passwordChangeClick( 'add')">
+                                             <i class="fa fa-key"></i>
+                                             <span> Şifre Değiştir</span>
                                           </button>
-                                      </div>
+                                       </div>
                                     </div>
                                     <div class="text-center text-sm-right">
                                        <div class="text-muted">
@@ -707,11 +760,11 @@
                                                    </div>
                                                    <div class="form-group">
                                                       <label for="agencyId">Şube<small [hidden]="isAdmin">(Okuma
-                                                         Amacı)</small></label>
+                                                            Amacı)</small></label>
                                                       <span *ngIf="userAgency.value =='' " style="color: red;"><strong>
                                                             *
                                                          </strong></span>
-                                                      <select [disabled]="!isAdmin"  name="agencyId" #userAgency
+                                                      <select [disabled]="!isAdmin" name="agencyId" #userAgency
                                                          (change)="onAgencyChange($event)" [(ngModel)]="user.agency.id"
                                                          id="agencyId" class="form-control">
                                                          <option value="">Bir Ajans Seçin
@@ -748,15 +801,16 @@
                                                 <div class="col">
                                                    <div class="custom-controls-stacked px-2">
                                                       <div class="custom-control custom-checkbox">
-                                                         <input  [disabled]="!isAdmin" name="active" type="checkbox" [(ngModel)]="user.active"
-                                                            class="custom-control-input">
-                                                         <label class="custom-control-label">Aktif<small [hidden]="isAdmin">(Okuma
-                                                            Amacı)</small></label>
+                                                         <input [disabled]="!isAdmin" name="active" type="checkbox"
+                                                            [(ngModel)]="user.active" class="custom-control-input">
+                                                         <label class="custom-control-label">Aktif<small
+                                                               [hidden]="isAdmin">(Okuma
+                                                               Amacı)</small></label>
                                                       </div>
                                                       <div class="custom-control custom-checkbox">
                                                          <input [disabled]="!isAdmin" name="notLocked" type="checkbox"
                                                             [(ngModel)]="user.notLocked" class="custom-control-input">
-                                                         <label  class="custom-control-label">kilidi
+                                                         <label class="custom-control-label">kilidi
                                                             açıldı<small [hidden]="isAdmin">(Okuma
                                                                Amacı)</small></label>
                                                       </div>
@@ -810,57 +864,57 @@
       <input type="file" (change)="onProfileImageChange($event); onUpdateProfileImage()" name="profile-image-input"
          id="profile-image-input" placeholder="file" ngModel accept="image/*" />
    </form>
+   <!-- sifre degistirme -->
    <div class="container" id="main-container">
       <div class="modal fade" id="addHomeResModal" tabindex="-1" role="dialog" aria-labelledby="addHomeResModalLabel"
-          aria-hidden="true">
-          <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                  <div class="modal-header">
-                      <h5 class="modal-title" id="addHomeResModalLabel">Şifre Değiştirme</h5>
-                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                          <span aria-hidden="true">&times;</span>
-                      </button>
-                  </div>
-                  <div class="modal-body">
-                      <form #addPassForm="ngForm" (ngSubmit)="passwordChange(addPassForm)">
-                          <div class="form-group">
-                              <label for="currentPassword">Eski Şifre</label>
-                              <input type="password"  (keypress)="passwordRes()" ngModel
-                                  name="currentPassword" class="form-control" id="currentPassword"
-                                  placeholder="Eski Şifre" required>
-                          </div>
-                          <small style="color:red" [hidden]="!wrongPassword">Şifreniz hatalıdır. Lütfen kontrol ederek
-                              tekrar deneyin</small>
-  
-                          <div class="form-group">
-                              <input hidden [ngModel]="user.username" name="username" id="usernameId" class="form-control">
-                          </div>
-                          <div class="form-group">
-                              <label for="newPassword">Yeni Şifre</label>
-                              <input (keypress)="reset()" type="password" ngModel name="newPassword" class="form-control"
-                                  id="newPassword" placeholder="Yeni Şifre" required>
-                          </div>
-                          <div class="form-group">
-                              <label for="confirmPassword">Tekrar Yeni Şifre</label>
-                              <input (keypress)="reset()" type="password" ngModel name="confirmPassword"
-                                  class="form-control" id="confirmPassword" placeholder="Tekar Yeni Şifre" required>
-                          </div>
-                          <small style="color:red" [hidden]="!passwordDoesnotMatch">Yeni şifreniz ve onay şifreniz
-                              eşleşmiyor</small>
-  
-                          <div class="modal-footer">
-                              <button type="button" id="add-pass-home-form" class="btn btn-secondary"
-                                  data-dismiss="modal">Kapat</button>
-                              <button [disabled]="addPassForm.invalid" type="submit" class="btn btn-primary">Kayıt Et</button>
-                          </div>
-  
-                      </form>
-                  </div>
-              </div>
-          </div>
+         aria-hidden="true">
+         <div class="modal-dialog" role="document">
+            <div class="modal-content">
+               <div class="modal-header">
+                  <h5 class="modal-title" id="addHomeResModalLabel">Şifre Değiştirme</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                     <span aria-hidden="true">&times;</span>
+                  </button>
+               </div>
+               <div class="modal-body">
+                  <form #addPassForm="ngForm" (ngSubmit)="passwordChange(addPassForm)">
+                     <div class="form-group">
+                        <label for="currentPassword">Eski Şifre</label>
+                        <input type="password" (keypress)="passwordRes()" ngModel name="currentPassword"
+                           class="form-control" id="currentPassword" placeholder="Eski Şifre" required>
+                     </div>
+                     <small style="color:red" [hidden]="!wrongPassword">Şifreniz hatalıdır. Lütfen kontrol ederek
+                        tekrar deneyin</small>
+
+                     <div class="form-group">
+                        <input hidden [ngModel]="user.username" name="username" id="usernameId" class="form-control">
+                     </div>
+                     <div class="form-group">
+                        <label for="newPassword">Yeni Şifre</label>
+                        <input (keypress)="reset()" type="password" ngModel name="newPassword" class="form-control"
+                           id="newPassword" placeholder="Yeni Şifre" required>
+                     </div>
+                     <div class="form-group">
+                        <label for="confirmPassword">Tekrar Yeni Şifre</label>
+                        <input (keypress)="reset()" type="password" ngModel name="confirmPassword" class="form-control"
+                           id="confirmPassword" placeholder="Tekar Yeni Şifre" required>
+                     </div>
+                     <small style="color:red" [hidden]="!passwordDoesnotMatch">Yeni şifreniz ve onay şifreniz
+                        eşleşmiyor</small>
+
+                     <div class="modal-footer">
+                        <button type="button" id="add-pass-home-form" class="btn btn-secondary"
+                           data-dismiss="modal">Kapat</button>
+                        <button [disabled]="addPassForm.invalid" type="submit" class="btn btn-primary">Kayıt Et</button>
+                     </div>
+
+                  </form>
+               </div>
+            </div>
+         </div>
       </div>
-  
-  </div>
+
+   </div>
    <!-- requeted status menu-->
    <div class="tab-pane fade" id="show-requested">
       <div class="container" id="main-container">
@@ -879,28 +933,34 @@
          </div>
       </div>
    </div>
-   
+
    <!-- requested data Full page -->
    <div class="tab-pane fade" id="show-requested-homes">
       <div class="container" id="main-container">
          <!-- done -->
          <!-- show data -->
          <div class="row">
-            <div *ngFor="let requestedHome of requestedFilteredHome" class="col-md-6 col-xl-3">
+            <div *ngFor="let requestedHome of requestedFilteredHome" class="col-md-6 col-xl-3"
+               [hidden]="showData(requestedHome)">
                <div class="card m-b-30 show-home">
                   <li class="list-group-item" (click)="onSelect(requestedHome,'openRequestedHomeInfo')">
-                     <h6><span [style]="'color:red;'">{{requestedHome?.status?.status}} </span><span
-                           [style]="'color:green;'">{{requestedHome?.priority?.priority}}
-                           {{requestedHome?.roomNumber?.roomNumber}}</span>
+                     <h6><span [style]="'color:red;'">{{requestedHome?.status?.status}} </span>
+                        <span [style]="'color:green;'">{{requestedHome?.priority?.priority}}</span>
+                     </h6>
+                     <h6><span [style]="'color:green;'">{{requestedHome?.location}} </span><span> - </span>
+                        {{requestedHome?.roomNumber?.roomNumber}}
                      </h6>
                      <h6><span [style]="'color:black;'">{{requestedHome?.recipientsName}} {{requestedHome?.budget}}
+                           {{requestedHome?.currency?.currency}}
                            {{requestedHome?.floors}}</span></h6>
                   </li>
                   <div class="card-body">
                      <div class="float-right btn-group btn-group-sm">
-                        <a [hidden]="!isUserCanEdit(requestedHome)" (click)="onOpenRequestedModal(requestedHome, 'edit')" class="btn btn-primary tooltips"
+                        <a [hidden]="!isUserCanEdit(requestedHome)"
+                           (click)="onOpenRequestedModal(requestedHome, 'edit')" class="btn btn-primary tooltips"
                            data-placement="top" data-original-title="Edit"><i class="fa fa-pencil"></i> </a>
-                        <a [hidden]="!isUserCanEdit(requestedHome)" (click)="onOpenRequestedModal(requestedHome, 'delete')" class="btn btn-secondary tooltips"
+                        <a [hidden]="!isUserCanEdit(requestedHome)"
+                           (click)="onOpenRequestedModal(requestedHome, 'delete')" class="btn btn-secondary tooltips"
                            data-placement="top" data-original-title="Delete"><i class="fa fa-times"></i></a>
                      </div>
                   </div>
@@ -917,19 +977,19 @@
             <div class="modal-dialog" role="document">
                <div class="modal-content">
                   <div class="modal-header">
+                     <h5 style="color:red; text-align: left; "><i class="fa fa-envelope float-right"></i>
+                        {{selectedRequestedHomes?.status?.status}}</h5>
                      <button type="button" class="close" data-dismiss="modal" aria-label=" Close">
                         <span aria-hidden="true">&times;</span>
                      </button>
                   </div>
                   <div class="modal-body">
                      <ul class="list-group list-group-flush">
+
                         <li class="list-group-item">
-                           <h6 style="color:red"><i class="fa fa-envelope float-right"></i>
-                              {{selectedRequestedHomes?.status?.status}}</h6>
-                        </li>
-                        <li class="list-group-item">
-                           <h6 style="color:green"><i class="fa fa-envelope float-right"></i>Öncelik Durumu:
-                              {{selectedRequestedHomes?.priority?.priority}}</h6>
+                           <h6><i class="fa fa-envelope float-right"></i>Öncelik Durumu:
+                              <span style="color:green">{{selectedRequestedHomes?.priority?.priority}}</span>
+                           </h6>
                         </li>
                         <li class="list-group-item">
                            <i class="fa fa-envelope float-right"></i><strong>Bütce : </strong>
@@ -956,8 +1016,13 @@
                            {{selectedRequestedHomes?.user?.firstName}} {{selectedRequestedHomes?.user?.lastName}}
                         </li>
                         <li class="list-group-item">
-                           <i class="fa fa-envelope float-right"></i><strong>Note : </strong>
-                           {{selectedRequestedHomes?.note}}
+                           <i class="fa fa-envelope float-right"></i><strong>Açıklama :
+                           </strong>
+                           <span [hidden]="isLink(selectedRequestedHomes?.note)">
+                              {{selectedRequestedHomes?.note}}
+                           </span>
+                           <span [hidden]="!isLink(selectedRequestedHomes?.note)">
+                              <a href="{{selectedRequestedHomes?.note}}" style="color: black;" >{{selectedRequestedHomes?.note}}</a></span>
                         </li>
                      </ul>
                   </div>
@@ -973,7 +1038,7 @@
             <div class="modal-dialog" role="document">
                <div class="modal-content">
                   <div class="modal-header">
-                     <h5 class="modal-title" id="addRequestedHomeModalLabel">{{requestedStatus?.status}} Taleb Ekleme
+                     <h5 class="modal-title" id="addRequestedHomeModalLabel">{{requestedStatus?.status}} Talep Ekleme
                      </h5>
                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -990,7 +1055,7 @@
 
                         <div class="form-group">
                            <label for="priorityId">Öncelik Durumu</label>
-                           <select [ngModel]="selectedPriority?.id" name="priorityId" id="priorityId"
+                           <select [ngModel]="selectedPriority?.id" name="priorityId" id="addRequestedHomePriorityId"
                               class="form-control" required>
                               <option *ngFor="let priority of priorities" [ngValue]="priority.id">
                                  {{priority?.priority}} </option>
@@ -998,18 +1063,24 @@
                         </div>
                         <div class="form-group">
                            <label for="location">Lokasyonlar</label>
-                           <input type="text" ngModel name="location" class="form-control" id="location"
-                              placeholder="Lokasyonlar" required>
+                           <input type="text" ngModel name="location" class="form-control"
+                              id="addRequestedHomeLocationId" placeholder="Lokasyonlar" required>
                         </div>
                         <div class="form-group">
                            <label for="budget">Bütce</label>
-                           <input type="number" ngModel name="budget" class="form-control" id="budget"
-                              placeholder="Bütce" required>
+                           <input type="text" (keypress)="controlValue($event)" ngModel name="budget"
+                              class="form-control" id="addBudgetId" placeholder="Bütce" required>
+                           <label for="currencyId">Birim : </label>
+                           <select [ngModel]="selectedCurrency?.id" name="currencyId" id="addHomeTypeCurrencyId"
+                              class="form-control">
+                              <option *ngFor="let currency of currencies" [ngValue]="currency.id">
+                                 {{currency.currency}} </option>
+                           </select>
                         </div>
                         <div class="form-group">
                            <label for="roomNumberId">Oda Sayısı</label>
-                           <select [ngModel]="selectedRoomNumber?.id" name="roomNumberId" id="roomNumberId"
-                              class="form-control" required>
+                           <select [ngModel]="selectedRoomNumber?.id" name="roomNumberId"
+                              id="addRequestedHomeRoomNumberId" class="form-control" required>
                               <option *ngFor="let roomNumber of roomNumbers" [ngValue]="roomNumber.id">
                                  {{roomNumber.roomNumber}} </option>
                            </select>
@@ -1017,17 +1088,17 @@
                         <hr>
                         <div class="form-group">
                            <label for="floors">Katlar</label>
-                           <input type="text" ngModel name="floors" class="form-control" id="floorNumber"
+                           <input type="text" ngModel name="floors" class="form-control" id="addHomefloorNumberId"
                               placeholder="Bulunduğu kat" required>
                         </div>
                         <div class="form-group">
-                           <input [hidden]="true" [ngModel]="user.userId" name="userId" id="userId"
+                           <input [hidden]="true" [ngModel]="user.userId" name="userId" id="requestedHomeUserId"
                               class="form-control">
                         </div>
 
                         <div class="form-group">
-                           <input [hidden]="true" [ngModel]="requestedStatus?.id" name="statusId" id="statusId"
-                              class="form-control">
+                           <input [hidden]="true" [ngModel]="requestedStatus?.id" name="statusId"
+                              id="addRequestedHomestatusId" class="form-control">
                         </div>
                         <div class="form-group">
                            <label for="note">Not</label>
@@ -1068,8 +1139,8 @@
                         <!-- select priority -->
                         <div class="form-group">
                            <label for="priorityId">Öncelik Durumu</label>
-                           <select [ngModel]="editRequestedHome?.priority?.id" name="priorityId" id="priorityId"
-                              class="form-control">
+                           <select [ngModel]="editRequestedHome?.priority?.id" name="priorityId"
+                              id="editRequestedHomePriorityId" class="form-control">
                               <option *ngFor="let priority of priorities" [ngValue]="priority.id">
                                  {{priority.priority}} </option>
                            </select>
@@ -1078,24 +1149,29 @@
                         <div class="form-group">
                            <label for="location">Adres : </label>
                            <input type="text" [ngModel]="editRequestedHome?.location" name="location"
-                              class="form-control" id="location" placeholder="Location" required>
+                              class="form-control" id="editRequestedHomeLocationId" placeholder="Location" required>
                         </div>
                         <!-- budget input   -->
                         <div class="form-group">
                            <label for="budget">Bütce</label>
-                           <input type="number" [ngModel]="editRequestedHome?.budget" name="budget" class="form-control"
-                              id="budget" placeholder="Bütce" required>
+                           <input type="text" (keypress)="controlValue($event)" [ngModel]="editRequestedHome?.budget"
+                              name="budget" class="form-control" id="editbudgetId" placeholder="Bütce" required>
+                           <select [ngModel]="editRequestedHome?.currency?.id" name="currencyId" id="budgetCurrencyId"
+                              class="form-control">
+                              <option *ngFor="let currency of currencies" [ngValue]="currency.id">
+                                 {{currency.currency}} </option>
+                           </select>
                         </div>
                         <!-- select Room number -->
                         <div class="form-group">
                            <label for="roomNumberId">Oda Sayısı : </label>
-                           <select [ngModel]="editRequestedHome?.roomNumber?.id" name="roomNumberId" id="roomNumberId"
-                              class="form-control">
+                           <select [ngModel]="editRequestedHome?.roomNumber?.id" name="roomNumberId"
+                              id="editRequestedHomeRoomNumberId" class="form-control">
                               <option *ngFor="let roomNumber of roomNumbers" [ngValue]="roomNumber.id">
                                  {{roomNumber.roomNumber}} </option>
                            </select>
                         </div>
-                
+
                         <!-- floors  -->
                         <div class="form-group">
                            <label for="floors">Katlar</label>
@@ -1104,16 +1180,22 @@
                         </div>
                         <!-- select User  -->
                         <div class="form-group">
-                           <input [hidden]="true" [ngModel]="user.userId" name="userId" id="userId"
+                           <input [hidden]="true" [ngModel]="user.userId" name="userId" id="requestedHomeEditUserId"
                               class="form-control">
+                        </div>
+
+                        <div class="form-group">
+                           <input [hidden]="true" [ngModel]="editRequestedHome?.status?.id" name="statusId"
+                              id="editRequestedHomeStatusId" class="form-control">
                         </div>
                         <!-- Note Input -->
                         <div class="form-group">
                            <label for="note">Not</label>
                            <textarea type="text" [ngModel]="editRequestedHome?.note" name="note" class="form-control"
-                              [style]="'resize:none;'" id="note" placeholder="Not..." required></textarea>
+                              [style]="'resize:none;'" id="editnoteId" placeholder="Not..." required></textarea>
                         </div>
-                        <input type="hidden" [ngModel]="editRequestedHome?.id" name="id" class="form-control" id="id">
+                        <input type="hidden" [ngModel]="editRequestedHome?.id" name="id" class="form-control"
+                           id="editRequestedHomeId">
                         <div class="modal-footer">
                            <button type="button" id="" data-dismiss="modal" class="btn btn-secondary">Kapat</button>
                            <button (click)="onRequestedHomesUpdate(editRequestedForm)" data-dismiss="modal"
@@ -1139,7 +1221,7 @@
                   </div>
                   <!-- Button -->
                   <div class="modal-body">
-                     <p>{{deleteRequestedHome?.id}} talepi silmek ister misiniz?</p>
+                     <p> talepi silmek ister misiniz?</p>
                      <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Hayır</button>
                         <button (click)="onRequestedDeleteHome(deleteRequestedHome.id)" class="btn btn-danger"

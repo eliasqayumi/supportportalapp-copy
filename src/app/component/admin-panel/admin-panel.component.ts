@@ -28,12 +28,9 @@ export class AdminPanelComponent implements OnInit {
     this.showMenus = false;
   }
   public showMenu(): void {
-    // const sideBar: HTMLElement | any = document.getElementById("navSide");
     const sideBarUl: HTMLElement | any = document.getElementsByTagName("UL")[0];
-    console.log(this.showMenus)
     if (!this.showMenus) {
       this.showMenus = true;
-      // sideBarUl.style.marginLeft = "0";
     } else {
       this.showMenus = false;
 

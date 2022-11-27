@@ -40,11 +40,9 @@ export class TypeComponent implements OnInit {
   }
 
   public onAddType(addForm: NgForm): void {
-    console.log(addForm.value)
     document.getElementById('add-Type-form')?.click();
     this.TypeService.insert(addForm.value).subscribe(
       (response: Type) => {
-        console.log(response);
         this.getAll();
         addForm.reset();
       },
@@ -56,10 +54,8 @@ export class TypeComponent implements OnInit {
   }
 
   public onUpdateType(type: Type): void {
-    console.log(type)
     this.TypeService.update(type).subscribe(
       (response: Type) => {
-        console.log(response);
         this.getAll();
       },
       (error: HttpErrorResponse) => {
@@ -71,7 +67,6 @@ export class TypeComponent implements OnInit {
   public onDeleteType(typeId: number): void {
     this.TypeService.deleteById(typeId).subscribe(
       (response: void) => {
-        console.log(response);
         this.getAll();
       },
       (error: HttpErrorResponse) => {
@@ -81,7 +76,6 @@ export class TypeComponent implements OnInit {
   }
 
   public search(key: string): void {
-    console.log(key);
     const results: Type[] = [];
     for (const Type of this.types) {
       if (Type.type.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
@@ -115,7 +109,6 @@ export class TypeComponent implements OnInit {
     }
     container != null ? container.appendChild(button) : null;
     button.click();
-    console.log(mode)
   }
   public onSelect(Type:Type) {
     this.router.navigate([Type.id], { relativeTo: this.activatedRoute })

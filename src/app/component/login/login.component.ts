@@ -44,7 +44,6 @@ export class LoginComponent implements OnInit, OnDestroy {
           const token = response.headers.get(HeaderType.JWT_TOKEN);
           this.authenticationService.saveToken(token);
           this.authenticationService.addUserLocalCache(response.body);
-          console.log(this.authenticationService.getUserFromLocalCache().role);
           if (this.authenticationService.getUserFromLocalCache().role == "ROLE_USER"||this.authenticationService.getUserFromLocalCache().role == 'ROLE_HR'||this.authenticationService.getUserFromLocalCache().role == 'ROLE_MANAGER')
             this.router.navigateByUrl('/user');
           else

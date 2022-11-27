@@ -77,7 +77,6 @@ export class UserComponent implements OnInit, OnDestroy {
     this.subs.add(this.agencyService.getAll().subscribe(
       (response: Agency[]) => {
         this.agencies = response;
-        console.log(this.agencies)
         this.selectedAgency = this.agencies[0].id
       }, (errorResposne: HttpErrorResponse) => {
         this.sendNotification(NotificationType.ERROR, errorResposne.error.message);
@@ -174,7 +173,6 @@ export class UserComponent implements OnInit, OnDestroy {
   // On search
   public searchUser(searchTerm: string): void {
     const result: User[] = [];
-    console.log(searchTerm)
     for (const user of this.userService.getUsersFromLocalCache()) {
       if (
         user.firstName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||

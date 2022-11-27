@@ -10,11 +10,21 @@
 
    <div class="collapse navbar-collapse" id="navbarColor02">
       <div class="my-content navbar-collapse">
+         <ul class="navbar-nav mr-auto">
+            <li class="nav-item active" *ngFor="let roomNumber of roomNumbers">
+               <a class="nav-item nav-link checkbox-items" id="{{'box'+roomNumber.id}}"
+                  (click)="checkboxClick(roomNumber)">{{roomNumber.roomNumber}}
+               </a>
+               <input (change)="checkboxOnChange($event)" hidden type="checkbox" id="{{'check-box'+roomNumber.id}}">
+            </li>
+         </ul>
+      </div>
+      <div class="my-content navbar-collapse">
          <form class="form-inline searchbar my-2 my-lg-0">
             <input type="search" (ngModelChange)="search(key.value)" #key="ngModel" ngModel name="key" id="searchName"
                class="form-control search-input mr-sm-2" placeholder="Emlak Arama..." required>
          </form>
-         <form class="form-inline my-2 my-lg-0 price-filtering">
+         <!-- <form class="form-inline my-2 my-lg-0 price-filtering">
             <label class="price-label ">Fiyat Aralığı</label>
             <div class="price-md">
                <input type="number" ngModel #minPrice="ngModel"
@@ -28,17 +38,11 @@
             </div>
             <label class="error-label" [hidden]="priceFilterValidation">Minumum fiyat maksimum fiyattan
                yüksektir</label>
-         </form>
+         </form> -->
       </div>
-      <ul class="navbar-nav mr-auto">
-         <li class="nav-item active" *ngFor="let roomNumber of roomNumbers">
-            <a class="nav-item nav-link checkbox-items" id="{{'box'+roomNumber.id}}"
-               (click)="checkboxClick(roomNumber)">{{roomNumber.roomNumber}}
-            </a>
-            <input (change)="checkboxOnChange($event)" hidden type="checkbox" id="{{'check-box'+roomNumber.id}}">
-         </li>
-      </ul>
    </div>
+
+   <!-- </div> -->
 </nav>
 
 <!--Show data  -->
@@ -46,12 +50,13 @@
    <div class="row">
       <div *ngFor="let home of homes" class="col-md-6 col-xl-3">
          <div class="card m-b-30">
-            <div class="card-body row">
-               <div class="col-4 card-title align-self-center mb-0">
-                  <h5>Fiyat {{home?.price}} {{home?.currency?.currency}}</h5>
-               </div>
-            </div>
             <ul class="list-group list-group-flush">
+               <li class="list-group-item"><i class="fa fa-envelope float-right"></i><strong>Başlık: </strong>
+                  <strong> <span [style]="'color:green;'">{{home?.header}}</span></strong>
+               </li>
+               <li class="list-group-item"><i class="fa fa-envelope float-right"></i><strong>Fiyat: </strong>
+                  <strong> <span [style]="'color:green;'">{{home?.price}} {{home?.currency?.currency}}</span></strong>
+               </li>
                <li class="list-group-item"><i class="fa fa-envelope float-right"></i><strong>Durum </strong>
                   <span [style]="'color:red; margin-left:10px'">{{home?.status?.status}}</span>
                </li>
@@ -69,11 +74,10 @@
                   {{home?.floorNumber}}. Kat </li>
                <li class="list-group-item"><i class="fa fa-envelope float-right"></i><strong> Kat Sayısı </strong>
                   {{home?.totalFloor}}</li>
-               <li class="list-group-item"><i class="fa fa-envelope float-right"></i><strong>Adres </strong>
-                  {{home?.address}} </li>
+
                <li class="list-group-item"><i class="fa fa-envelope float-right"></i><strong>Açıklama </strong>
                   {{home?.details}} </li>
-               <li class="list-group-item"><i class="fa fa-envelope float-right"></i><strong>Kullanıcı </strong>
+               <li class="list-group-item"><i class="fa fa-envelope float-right"></i><strong>Portföy Yetkilisi </strong>
                   {{home?.user?.firstName}} {{home?.user?.lastName}} </li>
 
             </ul>
@@ -102,12 +106,18 @@
             </div>
             <div class="modal-body">
                <form #addForm="ngForm" (ngSubmit)="onAddHome(addForm)">
+                  <!-- Header   -->
+                  <div class="form-group">
+                     <label for="header">Başlık</label>
+                     <input type="text" ngModel name="header" class="form-control" id="header" placeholder="Başlık"
+                        required>
+                  </div>
 
                   <!-- Price and Currency -->
                   <div class="form-group">
                      <label for="price">Fiyat</label>
-                     <input type="number" ngModel name="price" class="form-control" id="price" placeholder="500,000"
-                        required>
+                     <input type="text" (keypress)="controlValue($event)" ngModel name="price" class="form-control"
+                        id="price" placeholder="500.000" required>
                      <!-- select Currency -->
                      <label for="currencyId">Birim</label>
                      <select [ngModel]="selectedCurrency?.id" name="currencyId" id="currencyId" class="form-control"
@@ -193,9 +203,9 @@
 
                   <!-- Address Input -->
                   <div class="form-group">
-                     <label for="address">Adres : </label>
-                     <textarea type="text" [style]="'resize:none;'" ngModel name="address" class="form-control"
-                        id="address" placeholder="Adres..." required></textarea>
+                     <label [hidden]="true" for="address">Adres : </label>
+                     <textarea [hidden]="true" type="text" [style]="'resize:none;'" ngModel name="address"
+                        class="form-control" id="address" placeholder="Adres..."></textarea>
                   </div>
 
                   <!-- Details Input -->
@@ -307,9 +317,9 @@
                   </div>
                   <!-- Address Input -->
                   <div class="form-group">
-                     <label for="address">Adres : </label>
-                     <textarea type="text" [ngModel]="editHome?.address" name="address" class="form-control"
-                        [style]="'resize:none;'" id="address" placeholder="Adres..." required></textarea>
+                     <label [hidden]="true" for="address">Adres : </label>
+                     <textarea type="text" [hidden]="true" [ngModel]="editHome?.address" name="address"
+                        class="form-control" [style]="'resize:none;'" id="address" placeholder="Adres..."></textarea>
                   </div>
                   <!-- Details Input -->
                   <div class="form-group">

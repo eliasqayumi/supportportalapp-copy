@@ -6,5 +6,5 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  public titile="supportportal"
+  public titile="Türk Emlak Ofisi"
 }

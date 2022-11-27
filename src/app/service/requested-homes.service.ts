@@ -35,6 +35,7 @@ export class RequestedHomesService {
   public getFormData(ngForm: NgForm): FormData {
     const formData = new FormData();
     formData.append('recipientsName', ngForm.value.recipientsName);
+    formData.append('currencyId', ngForm.value.currencyId);
     formData.append('priorityId', ngForm.value.priorityId);
     formData.append('location', ngForm.value.location);
     formData.append('budget', ngForm.value.budget);

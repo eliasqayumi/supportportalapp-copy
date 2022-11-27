@@ -19,6 +19,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
   public showLoading: boolean = false;
   private subscriptions: Subscription = new Subscription();
   public agencies!: Agency[];
+  public isPhoneValidated: boolean = false;
 
   constructor(
     private router: Router,
@@ -47,6 +48,30 @@ export class RegisterComponent implements OnInit, OnDestroy {
       )
     );
   }
+    // contact Control
+    public contactValidation(event: any): boolean {
+      if ((Number(event.key) >= 0 && Number(event.key) <= 9)) {
+        if (event.key === '0' && event.target.value.length === 0)
+          event.target.value = '(' + event.target.value;
+        if (event.target.value[0] !== '(' && event.target.value[1] !== '0')
+          event.target.value = '(0' + event.target.value;
+        if (event.target.value.length == 5)
+          event.target.value = event.target.value + ')-';
+        if (event.target.value.length == 10 || event.target.value.length == 13)
+          event.target.value = event.target.value + '-';
+        return (event.target.value.length <= 15);
+      } else {
+        return false;
+      }
+    }
+    // on contact input change control
+    public onContactInputChangeControl(event: any): void {
+      if (event.target.value.length == 16 && event.target.value[1] === '0') {
+        this.isPhoneValidated = true;
+      } else {
+        this.isPhoneValidated = false;
+      }
+    }
 
   private sendNotification(notificationType: NotificationType, message: string): void {
     if (message) {

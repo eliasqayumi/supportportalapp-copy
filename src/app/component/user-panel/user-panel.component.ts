@@ -30,6 +30,7 @@ import { Priority } from 'src/app/model/Priority';
 import { RequestedHomes } from 'src/app/model/RequestedHomes';
 import { RequestedHomesService } from 'src/app/service/requested-homes.service';
 import { UserService } from 'src/app/service/user.service';
+import { MatCardXlImage } from '@angular/material';
 
 @Component({
   selector: 'app-user-main-page',
@@ -39,17 +40,21 @@ import { UserService } from 'src/app/service/user.service';
 export class UserPanelComponent implements OnInit {
   private subs = new SubSink();
   public fileStatus = new FileUploadStatus();
-  public filteringRoomNumbers: RoomNumber[] = new Array<RoomNumber>();
+  public filterByRoomNumbersList: RoomNumber[] = new Array<RoomNumber>();
   public homes!: Home[];
   public types!: Type[];
   public statuses!: Status[];
   public agencies!: Agency[];
   public cloneHomes!: Home[];
+  public filteredCloneHomes!: Home[];
   public requestedCloneHomes!: RequestedHomes[];
-  public filteredHome: any = [];
-  public requestedFilteredHome: any = [];
+  public filteredHome: Home[] = [];
+  public generalFilteredHome: any = [];
+  public requestedFilteredHome: RequestedHomes[] = [];
+  public cloneRequestedFilteredHome: RequestedHomes[] = [];
   public homeTypes!: HomeType[];
   public userHomeLists!: Home[];
+  public cloneUserHomeLists!: Home[];
   public currencies!: Currency[];
   public priorities!: Priority[];
   public roomNumbers!: RoomNumber[]
@@ -235,6 +240,7 @@ export class UserPanelComponent implements OnInit {
       this.homeService.getAllById(this.user.userId).subscribe(
         (response: Home[]) => {
           this.userHomeLists = this.sort(response)
+          this.cloneUserHomeLists = this.userHomeLists;
         }, (errorResposne: HttpErrorResponse) => {
           this.sendNotification(NotificationType.ERROR, errorResposne.error.message);
         }
@@ -255,7 +261,7 @@ export class UserPanelComponent implements OnInit {
       this.filterRoomNumberShow = true;
       this.filterRequestedHomesRoomNumberShow = false;
       this.selectedHomeType = value;
-      this.filtering();
+      this.filterAfterTypesAndStatusAndHomeTypeSelected()
     }
     else if (type == 'openGeneralHomeInfo') {
       this.selectedHome = value;
@@ -305,7 +311,6 @@ export class UserPanelComponent implements OnInit {
       this.filterRequestedHomesRoomNumberShow = false;
       this.addButton = false;
     }
-    this.doFilter()
     this.clickButton(type);
   }
   public updateProfileImage(): void {
@@ -426,6 +431,7 @@ export class UserPanelComponent implements OnInit {
     container != null ? container.appendChild(button) : null;
     button.click();
   }
+
   public onAddHome(ngForm: NgForm): void {
     const formData = this.homeService.getFormData(ngForm);
     document.getElementById('add-home-form')?.click();
@@ -516,48 +522,35 @@ export class UserPanelComponent implements OnInit {
 
   }
 
-  // should check
-  public search(key: string): void {
-    const results: Home[] = [];
-    for (let home of this.homes) {
-      if (home.neighbourhood.name.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
-        home.neighbourhood.district.name.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
-        home.neighbourhood.district.city.name.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
-        home.type.type.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+
+
+  public requestedHomesSearch(event: any): void {
+    let key = event.target.value
+    const results: RequestedHomes[] = [];
+    if (event.key == "Backspace" || !key)
+      this.requestedFilteredHome = this.cloneRequestedFilteredHome;
+    for (let home of this.requestedFilteredHome) {
+      if (
+        home.recipientsName.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.priority.priority.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.location.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.budget.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.currency.currency.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
         home.roomNumber.roomNumber.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
-        home.homeType.homeType.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
-        home.address.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
-        home.details.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
         home.status.status.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
-        home.neighbourhood.id == parseInt(key) ||
-        home.neighbourhood.district.id == parseInt(key) ||
+        home.floors.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.user.firstName.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.user.lastName.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.user.username.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.note.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
         home.id == parseInt(key)) {
         results.push(home);
       }
     }
-    // this.filtHomes = results;
-    if (!key) {
-      this.getAllHomes();
-    }
+    this.requestedFilteredHome = results;
   }
 
-  public checkboxOnChange(event: any) {
-    const checkedBox: HTMLElement | any = document.getElementById(event.target.id);
-    const element: HTMLElement | any = document.getElementById(event.target.id.split('-')[1]);
-    const checkRoomNumber = this.roomNumbers.find(result => result.id == (checkedBox.id.split('x')[1])) as RoomNumber;
-    if (checkedBox.checked) {
-      element.style.color = "red";
-    } else {
-      element.style.color = "white";
-    }
-    if (this.filteringRoomNumbers.filter(result => result.id == checkRoomNumber?.id).length > 0) {
-      let index = this.filteringRoomNumbers.findIndex(result => result.id == checkRoomNumber.id);
-      this.filteringRoomNumbers.splice(index, 1);
-    }
-    else
-      this.filteringRoomNumbers.push(checkRoomNumber);
-    this.filtering()
-  }
+
 
   public requestedCheckboxOnChange(event: any) {
     const checkedBox: HTMLElement | any = document.getElementById(event.target.id);
@@ -568,12 +561,12 @@ export class UserPanelComponent implements OnInit {
     } else {
       element.style.color = "white";
     }
-    if (this.filteringRoomNumbers.filter(result => result.id == checkRoomNumber?.id).length > 0) {
-      let index = this.filteringRoomNumbers.findIndex(result => result.id == checkRoomNumber.id);
-      this.filteringRoomNumbers.splice(index, 1);
+    if (this.filterByRoomNumbersList.filter(result => result.id == checkRoomNumber?.id).length > 0) {
+      let index = this.filterByRoomNumbersList.findIndex(result => result.id == checkRoomNumber.id);
+      this.filterByRoomNumbersList.splice(index, 1);
     }
     else
-      this.filteringRoomNumbers.push(checkRoomNumber);
+      this.filterByRoomNumbersList.push(checkRoomNumber);
     this.requestedFiltering()
   }
   public priceFiltering(price: any, priceType: string): void {
@@ -597,8 +590,11 @@ export class UserPanelComponent implements OnInit {
   public get isManager(): boolean {
     return this.isAdmin || this.getUserRole() === Role.MANAGER;
   }
-  public get isAdminOrManager(): boolean {
-    return this.isAdmin || this.isManager;
+  public get isHR(): boolean {
+    return this.getUserRole() === Role.HR;
+  }
+  public get isAdminOrManagerOrHR(): boolean {
+    return this.isAdmin || this.isManager || this.isHR;
   }
   public phoneValidation(phoneContact: string): string {
     if (phoneContact.length == 16 && phoneContact[0] == '(' && phoneContact[1] == '0') {
@@ -608,8 +604,30 @@ export class UserPanelComponent implements OnInit {
     }
     return phoneContact;
   }
+  //  General Homes filtering
+  public roomNumberOnSelectChange(event: any) {
+    const checkedBox: HTMLElement | any = document.getElementById(event.target.id);
+    const element: HTMLElement | any = document.getElementById(event.target.id.split('-')[1]);
+    const checkRoomNumber = this.roomNumbers.find(result => result.id == (checkedBox.id.split('x')[1])) as RoomNumber;
+    if (checkedBox.checked) {
+      element.style.color = "red";
+    } else {
+      element.style.color = "white";
+    }
+    if (this.filterByRoomNumbersList.filter(result => result.id == checkRoomNumber?.id).length > 0) {
+      let index = this.filterByRoomNumbersList.findIndex(result => result.id == checkRoomNumber.id);
+      this.filterByRoomNumbersList.splice(index, 1);
+    }
+    else
+      this.filterByRoomNumbersList.push(checkRoomNumber);
+    this.filtering()
+  }
+
+  /* ****
+  This filtering is just for general page 
+  *** */
   // private Methods
-  private doFilter(): void {
+  private filterAfterTypesAndStatusAndHomeTypeSelected(): void {
     if (this.selectedType !== null && this.selectedStatus !== null && this.selectedHomeType !== null)
       this.filteredHome = [];
     for (let home of this.homes)
@@ -620,50 +638,101 @@ export class UserPanelComponent implements OnInit {
       ) {
         this.filteredHome.push(home);
       }
+    this.filteredCloneHomes = this.filteredHome;
   }
-  private filterBaseOnPrice(): void {
-    let results: Home[] = []
-    // this is done
-    if (this.minPrice == 0 && this.maxPrice == 0) {
-      results = this.cloneHomes;
+
+  public generalSearch(event: any): void {
+    let key = event.target.value
+    const results: Home[] = [];
+    if (event.key == "Backspace" || !key) {
+      this.filteredHome = this.filteredCloneHomes;
     }
-    else if (this.minPrice !== 0 && this.maxPrice !== 0) {
-      for (let room of this.cloneHomes) {
-        if (room.price >= this.minPrice && room.price <= this.maxPrice) {
-          results.push(room);
-        }
-      }
-    }
-    else if (this.minPrice !== 0 && this.maxPrice == 0) {
-      for (let room of this.cloneHomes) {
-        if (room.price >= this.minPrice)
-          results.push(room);
-      }
-    }
-    else if (this.minPrice == 0 && this.maxPrice !== 0) {
-      for (let room of this.cloneHomes) {
-        if (room.price <= this.maxPrice)
-          results.push(room);
+    for (let home of this.filteredHome) {
+      if (home.header.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.neighbourhood.district.name.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.neighbourhood.district.city.name.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.type.type.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.roomNumber.roomNumber.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.homeType.homeType.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.address.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.details.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.status.status.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.neighbourhood.id == parseInt(key) ||
+        home.neighbourhood.district.id == parseInt(key) ||
+        home.id == parseInt(key)) {
+        results.push(home);
       }
     }
     this.filteredHome = results;
   }
 
+  // 
+  public userHomeSearch(event: any): void {
+    let key = event.target.value
+    const results: Home[] = [];
+    if (event.key == "Backspace" || !key) {
+      this.userHomeLists = this.cloneUserHomeLists;
+    }
+    for (let home of this.userHomeLists) {
+      if (home.header.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.neighbourhood.district.name.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.neighbourhood.district.city.name.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.type.type.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.roomNumber.roomNumber.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.homeType.homeType.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.address.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.details.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.status.status.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
+        home.neighbourhood.id == parseInt(key) ||
+        home.neighbourhood.district.id == parseInt(key) ||
+        home.id == parseInt(key)) {
+        results.push(home);
+      }
+    }
+    this.userHomeLists = results;
+  }
+
+
+
   private filtering(): void {
     let results: Home[] = [];
-    if (this.filteringRoomNumbers.length != 0) {
-      for (let roomNumber of this.filteringRoomNumbers) {
-        results.push(...this.homes.filter(result => {
+    if (this.filterByRoomNumbersList.length != 0) {
+      for (let roomNumber of this.filterByRoomNumbersList) {
+        results.push(...this.filteredCloneHomes.filter(result => {
           return result.roomNumber.id == roomNumber.id;
         }))
       }
     }
-    else if (this.filteringRoomNumbers.length == 0) {
-      results = this.homes;
+    else if (this.filterByRoomNumbersList.length == 0) {
+      results = this.filteredCloneHomes;
     }
-    this.cloneHomes = results;
-    this.filterBaseOnPrice();
+    this.filteredHome = results;
   }
+
+
+
+  public passwordRes(): void {
+    this.wrongPassword = false;
+  }
+  public controlValue(event: any): boolean {
+    if ((Number(event.key) >= 0 && Number(event.key) <= 9) || event.key == "Backspace" || event.key == "," || (event.key == "." && (event.target.value.split('.').length < 2))) {
+      if (event.target.value.split('.')[1] != null)
+        event.target.value = event.target.value.split('.')[0] + "." + event.target.value.split('.')[1];
+      else
+        event.target.value = event.target.value.split('.')[0];
+      return true;
+    }
+    return false;
+  }
+  public showData(home: RequestedHomes): boolean {
+    if (this.isAdminOrManagerOrHR) {
+      return false;
+    }
+    if (home.user.userId === this.user.userId)
+      return false;
+    return true
+  }
+
   // reformat contact
   public reformatContact(editUserContact: any): string {
     var phoneContact = '';
@@ -699,19 +768,23 @@ export class UserPanelComponent implements OnInit {
         `Finished all processes`;
     }
   }
+  public isLink(selectedHomeDetails: any): boolean {
+    return selectedHomeDetails?.split('://')[0] == "https" || selectedHomeDetails?.split('://')[0] == "http";
+  }
   private requestedFiltering(): void {
     let results: RequestedHomes[] = [];
-    if (this.filteringRoomNumbers.length != 0) {
-      for (let roomNumber of this.filteringRoomNumbers) {
+    if (this.filterByRoomNumbersList.length != 0) {
+      for (let roomNumber of this.filterByRoomNumbersList) {
         results.push(...this.requestedHomes.filter(result => {
           return result.roomNumber.id == roomNumber.id;
         }))
       }
     }
-    else if (this.filteringRoomNumbers.length == 0) {
+    else if (this.filterByRoomNumbersList.length == 0) {
       results = this.requestedHomes;
     }
     this.requestedFilteredHome = results;
+    this.cloneRequestedFilteredHome = this.requestedFilteredHome;
   }
   private clickButton(buttonId: string): void {
     document.getElementById(buttonId)?.click();
@@ -750,7 +823,6 @@ export class UserPanelComponent implements OnInit {
       this.passwordDoesnotMatch = false;
       this.subs.add(this.userService.updatePassword(formData).subscribe(
         (response: User | any) => {
-          console.log(response)
           document.getElementById('add-pass-home-form')?.click();
           ngForm.reset();
         },
@@ -768,7 +840,33 @@ export class UserPanelComponent implements OnInit {
     this.passwordDoesnotMatch = false;
   }
 
-  public passwordRes(): void {
-    this.wrongPassword = false;
+
+  // rubish
+  private filterBaseOnPrice(): void {
+    let results: Home[] = []
+    if (this.minPrice == 0 && this.maxPrice == 0) {
+      results = this.cloneHomes;
+    }
+    else if (this.minPrice !== 0 && this.maxPrice !== 0) {
+      for (let room of this.cloneHomes) {
+        if (room.price >= this.minPrice && room.price <= this.maxPrice) {
+          results.push(room);
+        }
+      }
+    }
+    else if (this.minPrice !== 0 && this.maxPrice == 0) {
+      for (let room of this.cloneHomes) {
+        if (room.price >= this.minPrice)
+          results.push(room);
+      }
+    }
+    else if (this.minPrice == 0 && this.maxPrice !== 0) {
+      for (let room of this.cloneHomes) {
+        if (room.price <= this.maxPrice)
+          results.push(room);
+      }
+    }
+    this.filteredHome = results;
+
   }
 }

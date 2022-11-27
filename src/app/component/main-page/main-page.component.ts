@@ -53,6 +53,8 @@ export class MainPageComponent implements OnInit, OnDestroy {
   public minPrice: number = 0;
   public maxPrice: number = 0;
   public priceFilterValidation: boolean = true;
+  public priceCommaSperated!: string;
+
 
 
   public currentUser!: User;
@@ -355,8 +357,8 @@ export class MainPageComponent implements OnInit, OnDestroy {
         this.maxPrice = 0
       else
         this.maxPrice = price;
-      }
-      if (Number(this.minPrice) > Number(this.maxPrice) && this.maxPrice != 0)
+    }
+    if (Number(this.minPrice) > Number(this.maxPrice) && this.maxPrice != 0)
       this.priceFilterValidation = false;
     else {
       this.priceFilterValidation = true;
@@ -373,13 +375,13 @@ export class MainPageComponent implements OnInit, OnDestroy {
     else if (this.minPrice !== 0 && this.maxPrice !== 0) {
       for (let room of this.cloneHomes) {
         if (room.price >= this.minPrice && room.price <= this.maxPrice)
-        results.push(room);
+          results.push(room);
       }
     }
     else if (this.minPrice !== 0 && this.maxPrice == 0) {
       for (let room of this.cloneHomes) {
         if (room.price >= this.minPrice)
-        results.push(room);
+          results.push(room);
       }
     }
     else if (this.minPrice == 0 && this.maxPrice !== 0) {
@@ -390,4 +392,15 @@ export class MainPageComponent implements OnInit, OnDestroy {
     }
     this.homes = results;
   }
+  public controlValue(event: any): boolean {
+    if ((Number(event.key) >= 0 && Number(event.key) <= 9) || event.key == "Backspace" || event.key == "," || (event.key == "." && (event.target.value.split('.').length < 2))) {
+      if (event.target.value.split('.')[1] != null)
+        event.target.value = event.target.value.split('.')[0] + "." + event.target.value.split('.')[1];
+      else
+        event.target.value = event.target.value.split('.')[0];
+      return true;
+    }
+    return false;
+  }
+
 }

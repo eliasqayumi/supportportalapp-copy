@@ -106,11 +106,11 @@ input[type=number] {
   flex-direction: row;
   flex-wrap: wrap;
 }
-.collapse{
+/* .collapse{
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
-}
+} */
 
 .search-input {
   width: 100%;

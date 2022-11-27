@@ -114,7 +114,6 @@ export class ProfilePageComponent implements OnInit {
       this.passwordDoesnotMatch = false;
       this.subs.add(this.userService.updatePassword(formData).subscribe(
         (response: User | any) => {
-          console.log(response)
           document.getElementById('add-home-form')?.click();
           ngForm.reset();
         },

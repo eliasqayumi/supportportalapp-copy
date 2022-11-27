@@ -40,11 +40,9 @@ export class RoomNumberComponent implements OnInit {
   }
 
   public onAddRoomNumber(addForm: NgForm): void {
-    console.log(addForm.value)
     document.getElementById('add-RoomNumber-form')?.click();
     this.roomNumberService.insert(addForm.value).subscribe(
       (response: RoomNumber) => {
-        console.log(response);
         this.getAll();
         addForm.reset();
       },
@@ -56,10 +54,8 @@ export class RoomNumberComponent implements OnInit {
   }
 
   public onUpdateRoomNumber(roomNumber: RoomNumber): void {
-    console.log(roomNumber)
     this.roomNumberService.update(roomNumber).subscribe(
       (response: RoomNumber) => {
-        console.log(response);
         this.getAll();
       },
       (error: HttpErrorResponse) => {
@@ -71,7 +67,6 @@ export class RoomNumberComponent implements OnInit {
   public onDeleteRoomNumber(roomNumberId: number): void {
     this.roomNumberService.deleteById(roomNumberId).subscribe(
       (response: void) => {
-        console.log(response);
         this.getAll();
       },
       (error: HttpErrorResponse) => {
@@ -81,7 +76,6 @@ export class RoomNumberComponent implements OnInit {
   }
 
   public search(key: string): void {
-    console.log(key);
     const results: RoomNumber[] = [];
     for (const RoomNumber of this.roomNumberes) {
       if (RoomNumber.roomNumber.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
@@ -115,7 +109,6 @@ export class RoomNumberComponent implements OnInit {
     }
     container != null ? container.appendChild(button) : null;
     button.click();
-    console.log(mode)
   }
   public onSelect(RoomNumber:RoomNumber) {
     this.router.navigate([RoomNumber.id], { relativeTo: this.activatedRoute })

@@ -43,7 +43,6 @@ export class PriorityComponent implements OnInit {
     document.getElementById('add-priority-form')?.click();
     this.priorityService.insert(addForm.value).subscribe(
       (response: Priority) => {
-        console.log(response);
         this.getAll();
         addForm.reset();
       },
@@ -57,7 +56,6 @@ export class PriorityComponent implements OnInit {
   public onUpdatePriority(priority: Priority): void {
     this.priorityService.update(priority).subscribe(
       (response: Priority) => {
-        console.log(response);
         this.getAll();
       },
       (error: HttpErrorResponse) => {
@@ -69,7 +67,6 @@ export class PriorityComponent implements OnInit {
   public onDeletePriority(priorityId: number): void {
     this.priorityService.deleteById(priorityId).subscribe(
       (response: void) => {
-        console.log(response);
         this.getAll();
       },
       (error: HttpErrorResponse) => {
@@ -79,7 +76,6 @@ export class PriorityComponent implements OnInit {
   }
 
   public search(key: string): void {
-    console.log(key);
     const results: Priority[] = [];
     for (const Priority of this.priorities) {
       if (Priority.priority.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
@@ -113,7 +109,6 @@ export class PriorityComponent implements OnInit {
     }
     container != null ? container.appendChild(button) : null;
     button.click();
-    console.log(mode)
   }
   public onSelect(Priority: Priority) {
     this.router.navigate([Priority.id], { relativeTo: this.activatedRoute })

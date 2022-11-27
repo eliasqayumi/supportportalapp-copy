@@ -1,3 +1,4 @@
+import { Currency } from "./Currency";
 import { Priority } from "./Priority";
 import { RoomNumber } from "./RoomNumber";
 import { Status } from "./Status";
@@ -9,6 +10,7 @@ export class RequestedHomes{
     priority!:Priority;
     location!:string;
     budget!:string;
+    currency!:Currency;
     roomNumber!:RoomNumber;
     status!:Status;// should add
     floors!:string;

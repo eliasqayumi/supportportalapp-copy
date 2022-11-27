@@ -61,11 +61,9 @@ export class NeighbourhoodComponent implements OnInit {
   }
 
   public onAddNeighbourhood(addForm: NgForm): void {
-    console.log(addForm.value)
     document.getElementById('add-Neighbourhood-form')?.click();
     this.neighbourhoodService.insert(addForm.value).subscribe(
       (response: Neighbourhood) => {
-        console.log(response);
         this.getAll();
         addForm.reset();
       },
@@ -77,10 +75,8 @@ export class NeighbourhoodComponent implements OnInit {
   }
 
   public onUpdateNeighbourhood(neighbourhood: Neighbourhood): void {
-    console.log(neighbourhood)
     this.neighbourhoodService.update(neighbourhood).subscribe(
       (response: Neighbourhood) => {
-        console.log(response);
         this.getAll();
       },
       (error: HttpErrorResponse) => {
@@ -92,7 +88,6 @@ export class NeighbourhoodComponent implements OnInit {
   public onDeleteNeighbourhood(neighbourhoodId: number): void {
     this.neighbourhoodService.deleteById(neighbourhoodId).subscribe(
       (response: void) => {
-        console.log(response);
         this.getAll();
       },
       (error: HttpErrorResponse) => {
@@ -102,7 +97,6 @@ export class NeighbourhoodComponent implements OnInit {
   }
 
   public search(key: string): void {
-    console.log(key);
     const results: Neighbourhood[] = [];
     for (const Neighbourhood of this.neighbourhoodes) {
       if (
@@ -143,7 +137,6 @@ export class NeighbourhoodComponent implements OnInit {
     }
     container != null ? container.appendChild(button) : null;
     button.click();
-    console.log(mode)
   }
   public onSelect(neighbourhood: Neighbourhood) {
     this.router.navigate([neighbourhood.id], { relativeTo: this.activatedRoute })

@@ -40,11 +40,9 @@ export class HomeTypeComponent implements OnInit {
   }
 
   public onAddHomeType(addForm: NgForm): void {
-    console.log(addForm.value)
     document.getElementById('add-HomeType-form')?.click();
     this.homeTypeService.insert(addForm.value).subscribe(
       (response: HomeType) => {
-        console.log(response);
         this.getAll();
         addForm.reset();
       },
@@ -56,10 +54,8 @@ export class HomeTypeComponent implements OnInit {
   }
 
   public onUpdateHomeType(homeType: HomeType): void {
-    console.log(homeType)
     this.homeTypeService.update(homeType).subscribe(
       (response: HomeType) => {
-        console.log(response);
         this.getAll();
       },
       (error: HttpErrorResponse) => {
@@ -71,7 +67,6 @@ export class HomeTypeComponent implements OnInit {
   public onDeleteHomeType(homeTypeId: number): void {
     this.homeTypeService.deleteById(homeTypeId).subscribe(
       (response: void) => {
-        console.log(response);
         this.getAll();
       },
       (error: HttpErrorResponse) => {
@@ -81,7 +76,6 @@ export class HomeTypeComponent implements OnInit {
   }
 
   public search(key: string): void {
-    console.log(key);
     const results: HomeType[] = [];
     for (const HomeType of this.homeTypes) {
       if (HomeType.homeType.toLowerCase().indexOf(key.toLowerCase()) !== -1 ||
@@ -115,7 +109,6 @@ export class HomeTypeComponent implements OnInit {
     }
     container != null ? container.appendChild(button) : null;
     button.click();
-    console.log(mode)
   }
   public onSelect(homeType:HomeType) {
     this.router.navigate([homeType.id], { relativeTo: this.activatedRoute })
